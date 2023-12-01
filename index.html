@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        input[type="text"] {
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 8px;
+            margin-right: 5px;
+        }
+
+        .selected {
+            background-color: #ccc !important;
+        }
+    </style>
+    <title>Table UI</title>
+</head>
+<body>
+
+    <input type="text" id="searchInput" placeholder="Search...">
+    <button id="selectAll">Select All</button>
+    <table id="dataTable">
+        <!-- Table content will be inserted here dynamically -->
+    </table>
+    <button id="deleteSelected">Delete Selected</button>
+    <div>
+        <button id="firstPage">First Page</button>
+        <button id="prevPage">Previous Page</button>
+        <span id="pageInfo"></span>
+        <button id="nextPage">Next Page</button>
+        <button id="lastPage">Last Page</button>
+    </div>
+
+    <script>
+        // Sample data from the provided endpoint
+        const data = [
+            {
+                "id": "1",
+                "name": "Aaron Miles",
+                "email": "aaron@mailinator.com",
+                "role": "member"
+            },
+            {
+                "id": "2",
+                "name": "Aishwarya Naik",
+                "email": "aishwarya@mailinator.com",
+                "role": "member"
+            },
+            {
+                "id": "3",
+                "name": "Arvind Kumar",
+                "email": "arvind@mailinator.com",
+                "role": "admin"
+            }
+            // ... Add more data as needed
+        ];
+
+        const itemsPerPage = 10;
+        let currentPage = 1;
+        let selectedRows = [];
+
+        function renderTable(pageData) {
+            const table = document.getElementById('dataTable');
+            table.innerHTML = ''; // Clear previous content
+
+            // Table header
+            const headerRow = table.insertRow();
+            for (const key in pageData[0]) {
+                const th = document.createElement('th');
+                th.textContent = key.charAt(0).toUpperCase() + key.slice(1);
+                headerRow.appendChild(th);
+            }
+
+            // Table rows
+            pageData.forEach(item => {
+                const row = table.insertRow();
+                for (const key in item) {
+                    const cell = row.insertCell();
+                    cell.textContent = item[key];
+                }
+
+                // Add edit and delete buttons to each row
+                const editButton = document.createElement('button');
+                editButton.textContent = 'Edit';
+                editButton.classList.add('edit');
+                editButton.addEventListener('click', () => editRow(item.id));
+                row.appendChild(editButton);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.classList.add('delete');
+                deleteButton.addEventListener('click', () => deleteRow(item.id));
+                row.appendChild(deleteButton);
+
+                // Highlight selected rows
+                if (selectedRows.includes(item.id)) {
+                    row.classList.add('selected');
+                }
+            });
+        }
+
+        function editRow(id) {
+            // Implement edit functionality
+            console.log(`Edit row with ID ${id}`);
+        }
+
+        function deleteRow(id) {
+            // Implement delete functionality
+            console.log(`Delete row with ID ${id}`);
+        }
+
+        function updatePagination() {
+            const totalItems = data.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const pageStart = (currentPage - 1) * itemsPerPage + 1;
+            const pageEnd = Math.min(currentPage * itemsPerPage, totalItems);
+            const pageInfo = `Showing ${pageStart} to ${pageEnd} of ${totalItems} entries`;
+
+            document.getElementById('pageInfo').textContent = pageInfo;
+            document.getElementById('firstPage').disabled = currentPage === 1;
+            document.getElementById('prevPage').disabled = currentPage === 1;
+            document.getElementById('nextPage').disabled = currentPage === totalPages;
+            document.getElementById('lastPage').disabled = currentPage === totalPages;
+        }
+
+        function selectAllRows() {
+            const rows = document.getElementById('dataTable').querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                row.classList.toggle('selected', !row.classList.contains('selected'));
+            });
+            updateSelectedRows();
+        }
+
+        function updateSelectedRows() {
+            selectedRows = [];
+            const selectedRowElements = document.querySelectorAll('#dataTable .selected');
+            selectedRowElements.forEach(row => {
+                selectedRows.push(row.cells[0].textContent); // Assuming ID is in the first cell
+            });
+        }
+
+        function deleteSelectedRows() {
+            // Implement delete selected functionality
+            console.log('Delete selected rows:', selectedRows);
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            renderTable(getPageData());
+            updatePagination();
+        }
+
+        function getPageData() {
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            return data.slice(startIndex, endIndex);
+        }
+
+        // Initial rendering
+        renderTable(getPageData());
+        updatePagination();
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', () => {
+            // Implement search functionality
+            console.log('Search:', document.getElementById('searchInput').value);
+        });
+
+        document.getElementById('selectAll').addEventListener('click', selectAllRows);
+        document.getElementById('deleteSelected').addEventListener('click', deleteSelectedRows);
+        document.getElementById('firstPage').addEventListener('click', () => goToPage(1));
+        document.getElementById('prevPage').addEventListener('click', () => goToPage(currentPage - 1));
+        document.getElementById('nextPage').addEventListener('click', () => goToPage(currentPage + 1));
+        document.getElementById('lastPage').addEventListener('click', () => goToPage(Math.ceil(data.length / itemsPerPage)));
+
+    </script>
+</body>
+</html>
